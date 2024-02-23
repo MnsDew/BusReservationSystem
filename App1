@@ -1,0 +1,345 @@
+
+
+Hello Sir , This is my Application for reserve a seat in the bus and , it includes many operations such as : entering data for customer 
+and, searching for id , deleting , save data to file and, load data as well and, password to open the custmers list.
+
+=======================================================
+package ex11;
+
+public interface Reservation {
+	public void makeReservation(int id, Passenger passenger);
+	public void deleteReservation(int id);
+}
+
+==================================================
+
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Bus implements Reservation, Serializable{
+
+	ArrayList<Seat> seats = new ArrayList<Seat>();
+	int numberofseats = 40;
+	int numberofreservedseats = 0;
+	int numberofunreservedseats = this.numberofseats;
+	transient Scanner inputreader = new Scanner(System.in); //transient because scanner is not serializable
+	
+	Bus(){
+		for(int i = 0; i<this.numberofseats;i++) {
+			seats.add(new Seat(i+1));
+		}
+	}
+	
+	@Override
+	public String toString() {
+		return "Bus [seats=" + seats + ", numberofseats=" + numberofseats + ", numberofreservedseats="
+				+ numberofreservedseats + ", numberofunreservedseats=" + numberofunreservedseats + "]";
+	}
+	@Override
+	public void makeReservation(int id, Passenger passenger) {
+		id = id -1; //because of the list which indexes start by 0
+		if(seats.get(id).isReserved) {
+			System.out.println("This seat is already reserved, please enter another id :");
+			int newId  = inputreader.nextInt();
+			this.makeReservation(newId, passenger); //making the reservation with the new id by calling the same method with the new params
+			
+		}
+		else {
+			seats.get(id).passenger.setName(passenger.getName());
+			seats.get(id).passenger.setSurname(passenger.getSurname());
+			seats.get(id).passenger.setPhonenumber(passenger.getPhonenumber());
+			seats.get(id).passenger.setMail(passenger.getMail());	
+			seats.get(id).isReserved = true;
+			
+			this.numberofreservedseats++;
+			this.numberofunreservedseats--;
+			
+			System.out.println("Thanks for your reservation...");
+		}
+		
+	}
+	@Override
+	public void deleteReservation(int id) {
+		id = id - 1;
+		if(!seats.get(id).isReserved) {
+			System.out.println("This seat is not reserved,therefore you can not cancel reservation...");
+		}
+		else {
+			seats.get(id).passenger.setName(null);
+			seats.get(id).passenger.setSurname(null);
+			seats.get(id).passenger.setPhonenumber(null);
+			seats.get(id).passenger.setMail(null);	
+			seats.get(id).isReserved = false;
+			
+			this.numberofreservedseats--;
+			this.numberofunreservedseats++;
+			
+			System.out.println("You canceled the reservation with id " + (id + 1)+ "\nLooking forward to see you again :)");
+		}
+		
+	}
+	
+	public void searchReservation(int id) {
+		boolean isFound = false;
+		for(int i = 0; i<this.numberofseats;i++) {
+			if(id == seats.get(i).getId() && seats.get(i).isReserved) {
+				System.out.println("---------------------------------");
+				System.out.println("         Reservation");
+				System.out.println("---------id = " + seats.get(i).getId());
+				System.out.println("---------name = " + seats.get(i).passenger.getName());
+				System.out.println("---------surname = " + seats.get(i).passenger.getSurname());
+				System.out.println("---------mail = " + seats.get(i).passenger.getMail());
+				System.out.println("---------phone = " + seats.get(i).passenger.getPhonenumber());
+				isFound = true;
+				break;
+			}
+		}
+		if(!isFound) {
+			System.out.println("No reservation found, you can reserve this seat...");
+		}
+	}
+	
+	public void listOfReservation() {
+		System.out.println("List of reservations\n");
+		for(int i = 0; i<this.numberofseats;i++) {
+				System.out.println("---------------------------------");			
+				System.out.println("---------id = " + seats.get(i).getId());
+				System.out.println("---------name = " + seats.get(i).passenger.getName());
+				System.out.println("---------surname = " + seats.get(i).passenger.getSurname());
+				System.out.println("---------mail = " + seats.get(i).passenger.getMail());
+				System.out.println("---------phone = " + seats.get(i).passenger.getPhonenumber());	
+			
+		}
+	}
+	
+	
+}
+
+=================================================================
+
+
+import java.io.Serializable;
+
+public class Seat implements Serializable {
+	private int id;
+	Passenger passenger = new Passenger(null, null, null, null);
+	boolean isReserved = false;
+	
+	Seat (int id){
+		this.setId(id);
+	}
+	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	@Override
+	public String toString() {
+		return "Seat [id=" + id + ", passenger=" + passenger + ", isReserved=" + isReserved + "]";
+	}
+	
+	
+}
+
+=============================================================
+
+
+
+import java.io.Serializable;
+
+public class Passenger implements Serializable {
+	private String name;
+	private String surname;
+	private String phonenumber;
+	private String mail;
+	
+	Passenger(String name, String surname, String phonenumber, String mail){
+		this.setName(name);
+		this.setSurname(surname);
+		this.setPhonenumber(phonenumber);
+		this.setMail(mail);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getSurname() {
+		return surname;
+	}
+
+	public void setSurname(String surname) {
+		this.surname = surname;
+	}
+
+	public String getPhonenumber() {
+		return phonenumber;
+	}
+
+	public void setPhonenumber(String phonenumber) {
+		this.phonenumber = phonenumber;
+	}
+
+	public String getMail() {
+		return mail;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
+	}
+
+	@Override
+	public String toString() {
+		return "Passenger [name=" + name + ", surname=" + surname + ", phonenumber=" + phonenumber + ", mail=" + mail
+				+ "]";
+	}
+	
+	
+	
+}
+
+======================================================================
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Scanner;
+
+public class App1 {
+
+	private static final String BUS_DATA_FILE = "bus_data.txt";
+
+	public static void main(String[] args) {
+		Bus bus ;
+		Passenger passenger = new Passenger(null, null, null, null);
+		
+		
+		try {
+			System.out.println("Loading previous data...");
+			FileInputStream fileIn = new FileInputStream(BUS_DATA_FILE);
+			ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+			bus = (Bus) objectIn.readObject();
+			objectIn.close();
+			System.out.println("Previous data loaded...");
+			
+		} catch (FileNotFoundException e) {
+			 bus = new Bus();
+	         System.out.println("No previous data found. Creating a new bus.");
+		}  catch (Exception e) {	
+		    e.printStackTrace();
+		    return;
+		}
+		
+		Scanner inputreader = new Scanner(System.in);
+		int choice;
+		int id;
+		
+		
+		
+		
+		
+		do {
+			System.out.println("------Welcome to the reservation system-----\n");
+			System.out.println("      1- Make a reservation");
+			System.out.println("      2- Cancel a reservation");
+			System.out.println("      3- Search for a reservation");
+			System.out.println("      4- List of reservation (admin only :) ..)\n");
+			System.out.print("Enter a number (1-4) to continue, 0 to exit : ");
+			choice = inputreader.nextInt();
+			
+			switch(choice) {
+				case 1:{
+					
+					System.out.print("\nTo make a reservation, enter the id : ");
+					id = inputreader.nextInt();
+					System.out.print("Enter your name:");
+					passenger.setName(inputreader.next());
+					System.out.print("Enter your surname:");
+					passenger.setSurname(inputreader.next());
+					System.out.print("Enter your phone number:");
+					passenger.setPhonenumber(inputreader.next());
+					System.out.print("Enter your mail:");
+					passenger.setMail(inputreader.next());
+					
+					bus.makeReservation(id, passenger);
+					System.out.println();
+					System.out.println();
+					break;
+				}
+				case 2:{
+					System.out.println("\nTo cancel a reservation, enter the reservation id: ");
+					id = inputreader.nextInt();
+					bus.deleteReservation(id);
+					
+					//to add space
+					System.out.println();
+					System.out.println();
+					break;
+				}
+				case 3:{
+					System.out.println("\nTo search for a reservation, enter the reservation id: ");
+					id = inputreader.nextInt();
+					bus.searchReservation(id);
+					
+					System.out.println();
+					System.out.println();
+					break;
+				}
+				case 4:{
+					// for simulating purposes, the password will be "mansoor gabali"
+					String enteredPw;
+					final String pw = "mansoor gabali";
+					System.out.println("\nTo access this part enter your password: ");
+					enteredPw = inputreader.nextInt();
+					
+					if(enteredPw == pw) {
+						bus.listOfReservation();
+					}
+					else {
+						System.out.println("Incorrect password...");
+					}
+				
+					System.out.println();
+					System.out.println();
+					break;
+				}
+				default:{
+					if(choice != 0)
+						System.out.println("\nPlease enter a valid choice (0-4)...\n");
+					else
+						System.out.println("\nLooking forward to see you again :) bye !");
+					
+					System.out.println();
+					System.out.println();
+				}
+			}
+			
+		}while(bus.numberofreservedseats != bus.numberofseats && choice != 0);
+		
+		inputreader.close();
+		
+		try {
+			FileOutputStream fileOut = new FileOutputStream(BUS_DATA_FILE);
+			ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+			objectOut.writeObject(bus);
+			objectOut.close();
+			
+			System.out.println("Bus data saved...");
+		} catch (Exception e) {
+			  e.printStackTrace();
+		}
+
+	}
+
+}
